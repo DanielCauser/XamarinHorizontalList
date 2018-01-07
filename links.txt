@@ -1,0 +1,17 @@
+
+https://github.com/MigueldeIcaza1/HorizontalListView
+
+https://developer.xamarin.com/guides/xamarin-forms/application-fundamentals/custom-renderer/listview/
+
+https://forums.xamarin.com/discussion/7790/horizontal-listview
+
+http://sharpmobilecode.com/android-listviews-reinvented/
+
+http://www.fabiocozzolino.eu/a-little-and-simple-bindable-horizontal-scroll-view/
+
+https://forums.xamarin.com/discussion/95355/renderer-horizontal-listview-in-android-with-recyclerview
+
+https://github.com/softsan/HorizontalListView/blob/master/HorizontalListView/HorizontalListView/HorizontalList.cs  
+
+Option to use syncfusion 
+https://help.syncfusion.com/xamarin/sflistview/viewappearance#orientation

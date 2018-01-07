@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="XamarinHorizontalList.Views.MainPage"
+             xmlns:local="clr-namespace:XamarinHorizontalList.Controls"
+             Title="{Binding Title}">
+
+    <StackLayout HorizontalOptions="Start"
+                 Margin="2">
+        <local:HorizontalListView ListOrientation="Horizontal"
+                                  ItemsSource="{Binding Monkeys}">
+            <local:HorizontalListView.ItemTemplate>
+                <DataTemplate>
+                    <ContentView>
+                        <ContentView.Content>
+                            <StackLayout WidthRequest="200">
+                                <Image Source="{Binding Image}" />
+
+                                <Label Text="{Binding Name}"
+                                       LineBreakMode="MiddleTruncation"
+                                       HorizontalTextAlignment="Center"
+                                       VerticalTextAlignment="Center"/>
+                            </StackLayout>
+                        </ContentView.Content>
+                    </ContentView>
+                </DataTemplate>
+            </local:HorizontalListView.ItemTemplate>
+        </local:HorizontalListView>
+
+        <Label Text="This is an app that displays a horizontal list full of monkeys."/>
+    </StackLayout>
+</ContentPage>
