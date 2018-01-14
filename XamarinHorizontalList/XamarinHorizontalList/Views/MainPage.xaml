@@ -4,29 +4,72 @@
              x:Class="XamarinHorizontalList.Views.MainPage"
              xmlns:local="clr-namespace:XamarinHorizontalList.Controls"
              Title="{Binding Title}">
+    <ScrollView>
+        <Grid HorizontalOptions="Start"
+              Margin="5">
 
-    <StackLayout HorizontalOptions="Start"
-                 Margin="2">
-        <local:HorizontalListView ListOrientation="Horizontal"
-                                  ItemsSource="{Binding Monkeys}">
-            <local:HorizontalListView.ItemTemplate>
-                <DataTemplate>
-                    <ContentView>
-                        <ContentView.Content>
-                            <StackLayout WidthRequest="200">
-                                <Image Source="{Binding Image}" />
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
 
-                                <Label Text="{Binding Name}"
-                                       LineBreakMode="MiddleTruncation"
-                                       HorizontalTextAlignment="Center"
-                                       VerticalTextAlignment="Center"/>
-                            </StackLayout>
-                        </ContentView.Content>
-                    </ContentView>
-                </DataTemplate>
-            </local:HorizontalListView.ItemTemplate>
-        </local:HorizontalListView>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
 
-        <Label Text="This is an app that displays a horizontal list full of monkeys."/>
-    </StackLayout>
+            <Label Text="The grid bellow is made of a rotated listview."/>
+
+            <RelativeLayout Grid.Row="1" HeightRequest="50">
+                <ListView Rotation="270" ItemsSource="{Binding Monkeys}" RowHeight="50" SeparatorVisibility="None"
+                              RelativeLayout.XConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width, Factor=0.5, Constant=-25}"
+                              RelativeLayout.YConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width, Factor=-0.5, Constant=25}"
+                              RelativeLayout.WidthConstraint="{ConstraintExpression Type=Constant, Constant=50}"
+                              RelativeLayout.HeightConstraint="{ConstraintExpression Type=RelativeToParent, Property=Width, Factor=1}"
+                              CachingStrategy="RecycleElement">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <ViewCell>
+                                <ContentView  Rotation="90" Padding="3" BackgroundColor="Transparent">
+                                    <Image Source="{Binding Image}"
+                                             HeightRequest="47"
+                                             WidthRequest="47"/>
+
+                                    <!--<Label Text="{Binding Name}"
+                                           LineBreakMode="MiddleTruncation"
+                                           HorizontalTextAlignment="Center"
+                                           VerticalTextAlignment="Center"/>-->
+                                </ContentView>
+                            </ViewCell>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </RelativeLayout>
+
+            <Label Text="The grid bellow is made of a custom control with a grid + horizontal scroll view"
+                   Grid.Row="2"/>
+
+            <local:HVScrollGridView ListOrientation="Horizontal"
+                                    ItemsSource="{Binding Monkeys}"
+                                    Grid.Row="3">
+                <local:HVScrollGridView.ItemTemplate>
+                    <DataTemplate>
+                        <ContentView>
+                            <ContentView.Content>
+                                <StackLayout WidthRequest="200">
+                                    <Image Source="{Binding Image}" />
+
+                                    <Label Text="{Binding Name}"
+                                               LineBreakMode="MiddleTruncation"
+                                               HorizontalTextAlignment="Center"
+                                               VerticalTextAlignment="Center"/>
+                                </StackLayout>
+                            </ContentView.Content>
+                        </ContentView>
+                    </DataTemplate>
+                </local:HVScrollGridView.ItemTemplate>
+            </local:HVScrollGridView>
+        </Grid>
+    </ScrollView>
 </ContentPage>

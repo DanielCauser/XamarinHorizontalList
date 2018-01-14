@@ -7,7 +7,7 @@ using Xamarin.Forms;
 
 namespace XamarinHorizontalList.Controls
 {
-    public class HorizontalListView : Grid
+    public class HVScrollGridView : Grid
     {
         private ICommand _innerSelectedCommand;
         private readonly ScrollView _scrollView;
@@ -20,16 +20,16 @@ namespace XamarinHorizontalList.Controls
         public double Spacing { get; set; }
 
         public static readonly BindableProperty SelectedCommandProperty =
-            BindableProperty.Create("SelectedCommand", typeof(ICommand), typeof(HorizontalListView), null);
+            BindableProperty.Create("SelectedCommand", typeof(ICommand), typeof(HVScrollGridView), null);
 
         public static readonly BindableProperty ItemsSourceProperty =
-            BindableProperty.Create("ItemsSource", typeof(IEnumerable), typeof(HorizontalListView), default(IEnumerable<object>), BindingMode.TwoWay, propertyChanged: ItemsSourceChanged);
+            BindableProperty.Create("ItemsSource", typeof(IEnumerable), typeof(HVScrollGridView), default(IEnumerable<object>), BindingMode.TwoWay, propertyChanged: ItemsSourceChanged);
 
         public static readonly BindableProperty SelectedItemProperty =
-            BindableProperty.Create("SelectedItem", typeof(object), typeof(HorizontalListView), null, BindingMode.TwoWay, propertyChanged: OnSelectedItemChanged);
+            BindableProperty.Create("SelectedItem", typeof(object), typeof(HVScrollGridView), null, BindingMode.TwoWay, propertyChanged: OnSelectedItemChanged);
 
         public static readonly BindableProperty ItemTemplateProperty =
-            BindableProperty.Create("ItemTemplate", typeof(DataTemplate), typeof(HorizontalListView), default(DataTemplate));
+            BindableProperty.Create("ItemTemplate", typeof(DataTemplate), typeof(HVScrollGridView), default(DataTemplate));
 
         public ICommand SelectedCommand
         {
@@ -57,11 +57,11 @@ namespace XamarinHorizontalList.Controls
 
         private static void ItemsSourceChanged(BindableObject bindable, object oldValue, object newValue)
         {
-            var itemsLayout = (HorizontalListView)bindable;
+            var itemsLayout = (HVScrollGridView)bindable;
             itemsLayout.SetItems();
         }
 
-        public HorizontalListView()
+        public HVScrollGridView()
         {
             _scrollView = new ScrollView();
 
@@ -150,7 +150,7 @@ namespace XamarinHorizontalList.Controls
 
         private static void OnSelectedItemChanged(BindableObject bindable, object oldValue, object newValue)
         {
-            var itemsView = (HorizontalListView)bindable;
+            var itemsView = (HVScrollGridView)bindable;
             if (newValue == oldValue && newValue != null)
             {
                 return;
