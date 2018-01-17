@@ -83,9 +83,11 @@
                    Grid.Row="4"
 				   VerticalOptions="End"/>
 
-			<Label Text="This is the listview"
-                   Grid.Row="5"
-				   VerticalOptions="End"/>
+			<local:HorizontalViewNative ItemsSource="{Binding Monkeys}"
+										  Grid.Row="5"
+										  VerticalOptions="End">
+				
+			</local:HorizontalViewNative>
 		</Grid>
 	</ScrollView>
 </ContentPage>
