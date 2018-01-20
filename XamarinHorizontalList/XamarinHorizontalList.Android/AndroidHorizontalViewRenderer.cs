@@ -31,16 +31,11 @@ namespace XamarinHorizontalList.Droid
         {
             if (e.PropertyName == nameof(Element.ItemsSource))
             {
-                UpdateAdapter();
+                var dataSource = Element.ItemsSource.Cast<object>().ToList();
+                var adapter = new RecycleViewAdapter(Forms.Context as Android.App.Activity, Element);
+                adapter.NotifyDataSetChanged();
+                Control.SetAdapter(adapter);
             }
-        }
-
-        private void UpdateAdapter()
-        {
-            var dataSource = Element.ItemsSource.Cast<object>().ToList();
-            var adapter = new RecycleViewAdapter(Forms.Context as Android.App.Activity, Element) { HasStableIds = true };
-
-            Control.SetAdapter(adapter);
         }
 
         protected override void OnElementChanged(ElementChangedEventArgs<HorizontalViewNative> e)
@@ -68,6 +63,16 @@ namespace XamarinHorizontalList.Droid
 
         private readonly IList _dataSource;
 
+        public override long GetItemId(int position)
+        {
+            return base.GetItemId(position);
+        }
+        
+        public override int GetItemViewType(int position)
+        {
+            return base.GetItemViewType(position);
+        }
+
         public override int ItemCount => (_dataSource != null ? _dataSource.Count : 0);
 
         public RecycleViewAdapter(Activity context, HorizontalViewNative view)
@@ -75,6 +80,7 @@ namespace XamarinHorizontalList.Droid
             Context = context;
             _view = view;
             _dataSource = view.ItemsSource?.Cast<object>()?.ToList();
+            HasStableIds = true;
         }
 
         public override void OnBindViewHolder(RecyclerView.ViewHolder holder, int position)
@@ -107,8 +113,8 @@ namespace XamarinHorizontalList.Droid
                 LayoutParameters = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MatchParent,
                     ViewGroup.LayoutParams.MatchParent)
                 {
-                    Height = (int)(100),
-                    Width = (int)(100)
+                    Height = (int)(_view.ItemHeight * Resources.System.DisplayMetrics.Density),
+                    Width = (int)(_view.ItemWidth * Resources.System.DisplayMetrics.Density)
                 }
             };
             
@@ -124,7 +130,7 @@ namespace XamarinHorizontalList.Droid
         {
             ItemView = itemView;
         }
-
+        
         public void UpdateUi(ViewCell viewCell, object dataContext, HorizontalViewNative view)
         {
             var contentLayout = (FrameLayout)ItemView;
@@ -136,10 +142,10 @@ namespace XamarinHorizontalList.Droid
             // Layout and Measure Xamarin Forms View
             var elementSizeRequest = viewCell.View.Measure(double.PositiveInfinity, double.PositiveInfinity, MeasureFlags.IncludeMargins);
 
-            var height = (int)((100 + viewCell.View.Margin.Top + viewCell.View.Margin.Bottom) * metrics.Density);
-            var width = (int)((100 + viewCell.View.Margin.Left + viewCell.View.Margin.Right) * metrics.Density);
+            var height = (int)((view.ItemHeight + viewCell.View.Margin.Top + viewCell.View.Margin.Bottom) * metrics.Density);
+            var width = (int)((view.ItemWidth + viewCell.View.Margin.Left + viewCell.View.Margin.Right) * metrics.Density);
 
-            viewCell.View.Layout(new Rectangle(0, 0, 100, 100));
+            viewCell.View.Layout(new Rectangle(0, 0, view.ItemWidth, view.ItemHeight));
 
             // Layout Android View
             var layoutParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.MatchParent)
@@ -157,7 +163,7 @@ namespace XamarinHorizontalList.Droid
 
             var viewGroup = renderer.View;
             viewGroup.LayoutParameters = layoutParams;
-            viewGroup.Layout(0, 0, 100, 100);
+            viewGroup.Layout(0, 0, width, height);
 
             contentLayout.RemoveAllViews();
             contentLayout.AddView(viewGroup);
