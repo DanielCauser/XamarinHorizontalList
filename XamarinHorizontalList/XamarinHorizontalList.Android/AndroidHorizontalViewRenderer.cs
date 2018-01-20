@@ -8,9 +8,11 @@ using System.Text;
 
 using Android.App;
 using Android.Content;
+using Android.Content.Res;
 using Android.OS;
 using Android.Runtime;
 using Android.Support.V7.Widget;
+using Android.Util;
 using Android.Views;
 using Android.Widget;
 using Xamarin.Forms;
@@ -21,139 +23,144 @@ using XamarinHorizontalList.Droid;
 [assembly: ExportRenderer(typeof(HorizontalViewNative), typeof(AndroidHorizontalViewRenderer))]
 namespace XamarinHorizontalList.Droid
 {
-	public class AndroidHorizontalViewRenderer : ViewRenderer<HorizontalViewNative, RecyclerView>
-	{
-		private LinearLayoutManager _horizontalLayoutManager;
+    public class AndroidHorizontalViewRenderer : ViewRenderer<HorizontalViewNative, RecyclerView>
+    {
+        private LinearLayoutManager _horizontalLayoutManager;
 
-		protected override void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e)
-		{
-			base.OnElementPropertyChanged(sender, e);
-		}
+        protected override void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(Element.ItemsSource))
+            {
+                UpdateAdapter();
+            }
+        }
 
-		protected override void OnElementChanged(ElementChangedEventArgs<HorizontalViewNative> e)
-		{
-			base.OnElementChanged(e);
+        private void UpdateAdapter()
+        {
+            var dataSource = Element.ItemsSource.Cast<object>().ToList();
+            var adapter = new RecycleViewAdapter(Forms.Context as Android.App.Activity, Element) { HasStableIds = true };
 
-			var recyclerView = new RecyclerView(Context);
-			SetNativeControl(recyclerView);
-			_horizontalLayoutManager = new LinearLayoutManager(Context, OrientationHelper.Horizontal, false);
-			recyclerView.SetLayoutManager(_horizontalLayoutManager);
+            Control.SetAdapter(adapter);
+        }
 
-			if (e.OldElement != null)
-			{
-				//var itemsSource = e.OldElement.ItemsSource as INotifyCollectionChanged;
-				//if (itemsSource != null)
-				//{
-				//	itemsSource.CollectionChanged -= ItemsSourceOnCollectionChanged;
-				//}
-			}
+        protected override void OnElementChanged(ElementChangedEventArgs<HorizontalViewNative> e)
+        {
+            base.OnElementChanged(e);
 
-			if (e.NewElement != null)
-			{
-				Control.SetAdapter(new RecycleViewAdapter(Forms.Context as Android.App.Activity, e.NewElement));
-			}
+            if (e.NewElement != null)
+            {
+                var recyclerView = new RecyclerView(Context);
+                SetNativeControl(recyclerView);
 
-			var itemsSource = e.NewElement.ItemsSource as INotifyCollectionChanged;
-			if (itemsSource != null)
-			{
-				//itemsSource.CollectionChanged += ItemsSourceOnCollectionChanged;
-			}
-		}
+                _horizontalLayoutManager = new LinearLayoutManager(Context, OrientationHelper.Horizontal, false);
+                recyclerView.SetLayoutManager(_horizontalLayoutManager);
 
-		//private void ItemsSourceOnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
-		//{
-		//	var adapter = Control.GetAdapter();
-		//	switch (e.Action)
-		//	{
-		//		case NotifyCollectionChangedAction.Add:
-		//			RefreshAdapter();
-		//			adapter.NotifyItemRangeInserted(
-		//				positionStart: e.NewStartingIndex,
-		//				itemCount: e.NewItems.Count
-		//			);
-		//			break;
-		//		case NotifyCollectionChangedAction.Remove:
-		//			if (Element.ItemsSource.Count() == 0)
-		//			{
-		//				RefreshAdapter();
-		//				adapter.NotifyDataSetChanged();
-		//				return;
-		//			}
+                Control.SetAdapter(new RecycleViewAdapter(Forms.Context as Android.App.Activity, e.NewElement));
+            }
+        }
+    }
 
-		//			RefreshAdapter();
-		//			adapter.NotifyItemRangeRemoved(
-		//				positionStart: e.OldStartingIndex,
-		//				itemCount: e.OldItems.Count
-		//			);
-		//			break;
-		//		case NotifyCollectionChangedAction.Replace:
-		//			RefreshAdapter();
-		//			adapter.NotifyItemRangeChanged(
-		//				positionStart: e.OldStartingIndex,
-		//				itemCount: e.OldItems.Count
-		//			);
-		//			break;
-		//		case NotifyCollectionChangedAction.Move:
-		//			RefreshAdapter();
-		//			for (var i = 0; i < e.NewItems.Count; i++)
-		//				adapter.NotifyItemMoved(
-		//					fromPosition: e.OldStartingIndex + i,
-		//					toPosition: e.NewStartingIndex + i
-		//				);
-		//			break;
-		//		case NotifyCollectionChangedAction.Reset:
-		//			RefreshAdapter();
-		//			adapter.NotifyDataSetChanged();
-		//			break;
-		//		default:
-		//			throw new ArgumentOutOfRangeException();
-		//	}
-		//}
+    public class RecycleViewAdapter : RecyclerView.Adapter
+    {
+        private readonly Activity Context;
 
-		//private void RefreshAdapter()
-		//{
-		//	var sourceList = new List<object>();
-			
-		//	var dataSource = Element.ItemsSource.Cast<object>().ToList();
-		//	sourceList.AddRange(dataSource);
+        private readonly HorizontalViewNative _view;
 
-		//	var newAdapter = new RecycleViewAdapter(Element, Element);
-		//	_gridLayoutManager?.SetSpanSizeLookup(new SpanSizeLookup(_gridLayoutManager, newAdapter));
-		//	Control.SwapAdapter(newAdapter, false);
-		//}
-	}
+        private readonly IList _dataSource;
 
-	public class RecycleViewAdapter : RecyclerView.Adapter
-	{
-		private readonly Activity Context;
+        public override int ItemCount => (_dataSource != null ? _dataSource.Count : 0);
 
-		private readonly IList _dataSource;
+        public RecycleViewAdapter(Activity context, HorizontalViewNative view)
+        {
+            Context = context;
+            _view = view;
+            _dataSource = view.ItemsSource?.Cast<object>()?.ToList();
+        }
 
-		public override int ItemCount => (_dataSource != null ? _dataSource.Count : 0);
+        public override void OnBindViewHolder(RecyclerView.ViewHolder holder, int position)
+        {
+            var item = (RecycleViewHolder)holder;
+            var dataContext = _dataSource[position];
+            if (dataContext != null)
+            {
+                var dataTemplate = _view.ItemTemplate;
+                ViewCell viewCell;
+                var selector = dataTemplate as DataTemplateSelector;
+                if (selector != null)
+                {
+                    var template = selector.SelectTemplate(_dataSource[position], _view.Parent);
+                    viewCell = template.CreateContent() as ViewCell;
+                }
+                else
+                {
+                    viewCell = dataTemplate?.CreateContent() as ViewCell;
+                }
 
-		public RecycleViewAdapter(Activity context, HorizontalViewNative view)
-		{
-			Context = context;
-			_dataSource = view.ItemsSource?.Cast<object>()?.ToList();
-		}
+                item.UpdateUi(viewCell, dataContext, _view);
+            }
+        }
 
-		public override void OnBindViewHolder(RecyclerView.ViewHolder holder, int position)
-		{
+        public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType)
+        {
+            var contentFrame = new FrameLayout(parent.Context)
+            {
+                LayoutParameters = new FrameLayout.LayoutParams(ViewGroup.LayoutParams.MatchParent,
+                    ViewGroup.LayoutParams.MatchParent)
+                {
+                    Height = (int)(100),
+                    Width = (int)(100)
+                }
+            };
+            
+            contentFrame.DescendantFocusability = DescendantFocusability.AfterDescendants;
+            var viewHolder = new RecycleViewHolder(contentFrame);
+            return viewHolder;
+        }
+    }
 
-		}
+    public class RecycleViewHolder : RecyclerView.ViewHolder
+    {
+        public RecycleViewHolder(Android.Views.View itemView) : base(itemView)
+        {
+            ItemView = itemView;
+        }
 
-		public override RecyclerView.ViewHolder OnCreateViewHolder(ViewGroup parent, int viewType)
-		{
+        public void UpdateUi(ViewCell viewCell, object dataContext, HorizontalViewNative view)
+        {
+            var contentLayout = (FrameLayout)ItemView;
 
-			return null;
-		}
-	}
+            viewCell.BindingContext = dataContext;
+            viewCell.Parent = view;
 
-	public class RecycleViewHolder : RecyclerView.ViewHolder
-	{
-		public RecycleViewHolder(Android.Views.View itemView) : base(itemView)
-		{
+            var metrics = Resources.System.DisplayMetrics;
+            // Layout and Measure Xamarin Forms View
+            var elementSizeRequest = viewCell.View.Measure(double.PositiveInfinity, double.PositiveInfinity, MeasureFlags.IncludeMargins);
 
-		}
-	}
+            var height = (int)((100 + viewCell.View.Margin.Top + viewCell.View.Margin.Bottom) * metrics.Density);
+            var width = (int)((100 + viewCell.View.Margin.Left + viewCell.View.Margin.Right) * metrics.Density);
+
+            viewCell.View.Layout(new Rectangle(0, 0, 100, 100));
+
+            // Layout Android View
+            var layoutParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MatchParent, ViewGroup.LayoutParams.MatchParent)
+            {
+                Height = height,
+                Width = width
+            };
+
+            if (Platform.GetRenderer(viewCell.View) == null)
+            {
+                Platform.SetRenderer(viewCell.View, Platform.CreateRenderer(viewCell.View));
+            }
+            var renderer = Platform.GetRenderer(viewCell.View);
+
+
+            var viewGroup = renderer.View;
+            viewGroup.LayoutParameters = layoutParams;
+            viewGroup.Layout(0, 0, 100, 100);
+
+            contentLayout.RemoveAllViews();
+            contentLayout.AddView(viewGroup);
+        }
+    }
 }
