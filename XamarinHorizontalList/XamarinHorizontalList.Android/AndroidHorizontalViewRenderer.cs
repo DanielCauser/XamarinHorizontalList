@@ -25,15 +25,12 @@ namespace XamarinHorizontalList.Droid
 {
     public class AndroidHorizontalViewRenderer : ViewRenderer<HorizontalViewNative, RecyclerView>
     {
-        private LinearLayoutManager _horizontalLayoutManager;
 
         protected override void OnElementPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if (e.PropertyName == nameof(Element.ItemsSource))
             {
-                var dataSource = Element.ItemsSource.Cast<object>().ToList();
-                var adapter = new RecycleViewAdapter(Forms.Context as Android.App.Activity, Element);
-                adapter.NotifyDataSetChanged();
+                var adapter = new RecycleViewAdapter(Element);
                 Control.SetAdapter(adapter);
             }
         }
@@ -42,42 +39,32 @@ namespace XamarinHorizontalList.Droid
         {
             base.OnElementChanged(e);
 
-            if (e.NewElement != null)
+            if (Control == null)
             {
                 var recyclerView = new RecyclerView(Context);
+
+                recyclerView.SetLayoutManager(new LinearLayoutManager(Context, OrientationHelper.Horizontal, false));
+
                 SetNativeControl(recyclerView);
-
-                _horizontalLayoutManager = new LinearLayoutManager(Context, OrientationHelper.Horizontal, false);
-                recyclerView.SetLayoutManager(_horizontalLayoutManager);
-
-                Control.SetAdapter(new RecycleViewAdapter(Forms.Context as Android.App.Activity, e.NewElement));
             }
         }
     }
 
     public class RecycleViewAdapter : RecyclerView.Adapter
     {
-        private readonly Activity Context;
-
         private readonly HorizontalViewNative _view;
 
         private readonly IList _dataSource;
-
+        
+        public override int ItemCount => (_dataSource != null ? _dataSource.Count : 0);
+        
         public override long GetItemId(int position)
         {
-            return base.GetItemId(position);
-        }
-        
-        public override int GetItemViewType(int position)
-        {
-            return base.GetItemViewType(position);
+            return position;
         }
 
-        public override int ItemCount => (_dataSource != null ? _dataSource.Count : 0);
-
-        public RecycleViewAdapter(Activity context, HorizontalViewNative view)
+        public RecycleViewAdapter(HorizontalViewNative view)
         {
-            Context = context;
             _view = view;
             _dataSource = view.ItemsSource?.Cast<object>()?.ToList();
             HasStableIds = true;
