@@ -79,9 +79,10 @@
                 </local:HVScrollGridView.ItemTemplate>
             </local:HVScrollGridView>
 
-            <Label Text="The Horizontal View bellow is made of a custom renderer, Recycle view for android and blabla for iOS"
+            <Label Text="The Horizontal View bellow is made of a custom renderer, RecycleView for android and UICollectionView for iOS"
                    Grid.Row="4"
-				   VerticalOptions="End"/>
+				   VerticalOptions="End"
+                   HorizontalOptions="FillAndExpand"/>
 
             <local:HorizontalViewNative ItemsSource="{Binding Monkeys}"
                                         Grid.Row="5"

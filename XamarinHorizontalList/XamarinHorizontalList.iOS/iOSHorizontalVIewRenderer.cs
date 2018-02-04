@@ -23,7 +23,7 @@ namespace XamarinHorizontalList.iOS
         {
             if (e.PropertyName == nameof(HorizontalViewNative.ItemsSource))
             {
-                Control.Source = new iOSViewSource(Element as HorizontalViewNative);
+                Control.DataSource = new iOSViewSource(Element as HorizontalViewNative);
                 Control.RegisterClassForCell(typeof(iOSViewCell), nameof(iOSViewCell));
             }
         }
@@ -36,11 +36,14 @@ namespace XamarinHorizontalList.iOS
             {
                 var layout = new UICollectionViewFlowLayout();
                 layout.ScrollDirection = UICollectionViewScrollDirection.Horizontal;
-                
+
                 if (e.NewElement != null)
                 {
                     layout.ItemSize = new CGSize(e.NewElement.ItemWidth, e.NewElement.ItemHeight);
-                    var rect = new CGRect(0, 0, 200, 200);
+                    layout.MinimumInteritemSpacing = 0;
+                    layout.MinimumLineSpacing = 0;
+
+                    var rect = new CGRect(0, 0, 100, 100);
                     SetNativeControl(new UICollectionView(rect, layout));
                     Control.BackgroundColor = e.NewElement?.BackgroundColor.ToUIColor();
                 }
@@ -49,7 +52,7 @@ namespace XamarinHorizontalList.iOS
     }
 
 
-    public class iOSViewSource : UICollectionViewSource
+    public class iOSViewSource : UICollectionViewDataSource
     {
         private readonly HorizontalViewNative _view;
 
@@ -60,7 +63,7 @@ namespace XamarinHorizontalList.iOS
             _view = view;
             _dataSource = view.ItemsSource?.Cast<object>()?.ToList();
         }
-
+        
         public override nint NumberOfSections(UICollectionView collectionView)
         {
             return 1;
@@ -98,6 +101,8 @@ namespace XamarinHorizontalList.iOS
 
     public class iOSViewCell : UICollectionViewCell
     {
+        private UIView _view;
+
         public iOSViewCell(IntPtr p) : base(p)
         {
         }
@@ -106,19 +111,23 @@ namespace XamarinHorizontalList.iOS
         {
             viewCell.BindingContext = dataContext;
             viewCell.Parent = view;
-            
-            viewCell.View.Layout(new Rectangle(0, 0, view.ItemWidth, view.ItemHeight));
+
+            var height = (int)((view.ItemHeight + viewCell.View.Margin.Top + viewCell.View.Margin.Bottom));
+            var width = (int)((view.ItemWidth + viewCell.View.Margin.Left + viewCell.View.Margin.Right));
+            viewCell.View.Layout(new Rectangle(0, 0, width, height));
 
             if (Platform.GetRenderer(viewCell.View) == null)
             {
                 Platform.SetRenderer(viewCell.View, Platform.CreateRenderer(viewCell.View));
             }
-
             var renderer = Platform.GetRenderer(viewCell.View).NativeView;
-            renderer.AutoresizingMask = UIViewAutoresizing.All;
-            renderer.ContentMode = UIViewContentMode.ScaleToFill;
             
-            ContentView.AddSubview(renderer);
+            if (_view == null)
+            {
+                renderer.ContentMode = UIViewContentMode.ScaleAspectFit;
+                ContentView.AddSubview(renderer);
+            }
+            _view = renderer;
         }
     }
 }
