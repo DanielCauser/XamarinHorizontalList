@@ -126,9 +126,6 @@ namespace XamarinHorizontalList.Droid
             viewCell.Parent = view;
 
             var metrics = Resources.System.DisplayMetrics;
-            // Layout and Measure Xamarin Forms View
-            var elementSizeRequest = viewCell.View.Measure(double.PositiveInfinity, double.PositiveInfinity, MeasureFlags.IncludeMargins);
-
             var height = (int)((view.ItemHeight + viewCell.View.Margin.Top + viewCell.View.Margin.Bottom) * metrics.Density);
             var width = (int)((view.ItemWidth + viewCell.View.Margin.Left + viewCell.View.Margin.Right) * metrics.Density);
 
